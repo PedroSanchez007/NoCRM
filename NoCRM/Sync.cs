@@ -8,10 +8,9 @@ namespace NoCRM
 {
     public class Sync
     {
+        public static string Separator => "-";
         // 1. Don't forget to turn on one second delay after testing.
-        
 
-        
         private const int ProspectingListCapacity = 4999;
         //private const int ProspectingListCapacity = 2;
 
@@ -22,7 +21,7 @@ namespace NoCRM
         
         public Sync()
         {
-            var capitaRecords = CapitaCommunication.GetAllData().OrderBy(_ => _.District).ToList();
+            var capitaRecords = CapitaCommunication.GetNewData().OrderBy(_ => _.District).ToList();
             // for testing
             //capitaRecords = capitaRecords.Skip(0).Take(50).ToList();
             //ExcelWriting.ExportRecords(capitaRecords.ToImmutableArray(), @"Capita Export.csv");
@@ -91,7 +90,7 @@ namespace NoCRM
             for (var i = 0; i < bound; i++)
             {
                 var newProspectingListNumber = fullUpProspectingListTitle.AfterSeparator() + 1 + i;
-                var newProspectingListTitle = $"{_targetDistrict} {ExtensionMethods.Separator} {newProspectingListNumber}";
+                var newProspectingListTitle = $"{_targetDistrict} {Separator} {newProspectingListNumber}";
                 var cappedRecordsToInsert = GetCappedRecordsToInsert(ProspectingListCapacity);
                 var response = NoCrmCommunication.CreateProspectingList(cappedRecordsToInsert, newProspectingListTitle);
                 RemoveFromInserts(cappedRecordsToInsert);

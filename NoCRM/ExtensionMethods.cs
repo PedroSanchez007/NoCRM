@@ -5,8 +5,6 @@ namespace NoCRM
 {
     public static class ExtensionMethods
     {
-        public static string Separator => "=>";
-        
         public static string NowFormatted()
         {
             return DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
@@ -18,7 +16,7 @@ namespace NoCRM
                 return string.Empty;
 
             input = input.Trim();
-            var index = input.IndexOf(Separator, StringComparison.InvariantCulture);
+            var index = input.LastIndexOf(Sync.Separator, StringComparison.InvariantCulture);
             return index == -1 ? string.Empty : input[..index].Trim();
         }
         
@@ -28,11 +26,11 @@ namespace NoCRM
                 return default;
 
             input = input.Trim();
-            var index = input.IndexOf(Separator, StringComparison.InvariantCulture);
+            var index = input.LastIndexOf(Sync.Separator, StringComparison.InvariantCulture);
             if (index == -1) 
                 return default;
             
-            var numberText = input[(index + Separator.Length)..].Trim();
+            var numberText = input[(index + Sync.Separator.Length)..].Trim();
             if (!int.TryParse(numberText, NumberStyles.Any, CultureInfo.InvariantCulture, out var number))
                 return default;
 
