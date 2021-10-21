@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Net.Mime;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Web;
@@ -57,13 +58,43 @@ namespace NoCRM
             
             var httpTask = GetHttpTask(httpMethod, endPoint, content);
             var result = httpTask.GetAwaiter().GetResult();
+
+            // A one second delay is necessary for NoCRM not to groan. Speed is not really an issue as this is a daily process.
+            System.Threading.Thread.Sleep(1000);
+            
             if (result.IsSuccessStatusCode)
                 return result.Content.ReadAsStringAsync().Result;
 
-            Log.Error($"Http Request to { _client.BaseAddress + endPoint} failed with error code { result.StatusCode }");
-            if (httpMethod == HttpMethod.Put && result.StatusCode == HttpStatusCode.BadRequest)
-                Log.Error($"The error occurs when the data sent to update the CRM does not match the number of fields in the table that is being updated. Although it could be something else.");
+            if (ErrorHandling(httpMethod, endPoint, result))
+                Environment.Exit((int)result.StatusCode);
+            
             return string.Empty;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="httpMethod"></param>
+        /// <param name="endPoint"></param>
+        /// <param name="response"></param>
+        /// <returns>Whether the error is fatal</returns>
+        private bool ErrorHandling(HttpMethod httpMethod, string endPoint, HttpResponseMessage response)
+        {
+            Log.Error($"Http Request to { _client.BaseAddress + endPoint} failed with error code { response.StatusCode }");
+
+            if (httpMethod == HttpMethod.Put && response.StatusCode == HttpStatusCode.BadRequest)
+            {
+                Log.Error($"The error occurs when the data sent to update the CRM does not match the number of fields in the table that is being updated. Although it could be something else.");
+                return true;
+            }
+
+            if (response.StatusCode == HttpStatusCode.TooManyRequests)
+            {
+                Log.Error($"Too many HTTP requests were made to NoCRM. As at 20-10-2021, the limit is 2000. Application is shutting down.");
+                return true;
+            }
+
+            return false;
         }
 
         private ConfiguredTaskAwaitable<HttpResponseMessage> GetHttpTask(HttpMethod httpMethod, string endpoint, HttpContent content = null)

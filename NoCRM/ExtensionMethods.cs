@@ -32,7 +32,7 @@ namespace NoCRM
             if (index == -1) 
                 return default;
             
-            var numberText = input[(index + 1)..].Trim();
+            var numberText = input[(index + Separator.Length)..].Trim();
             if (!int.TryParse(numberText, NumberStyles.Any, CultureInfo.InvariantCulture, out var number))
                 return default;
 

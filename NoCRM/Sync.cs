@@ -8,6 +8,10 @@ namespace NoCRM
 {
     public class Sync
     {
+        // 1. Don't forget to turn on one second delay after testing.
+        
+
+        
         private const int ProspectingListCapacity = 4999;
         //private const int ProspectingListCapacity = 2;
 
@@ -18,10 +22,10 @@ namespace NoCRM
         
         public Sync()
         {
-            var capitaRecords = CapitaCommunication.GetNewData().OrderBy(_ => _.District).ToList();
+            var capitaRecords = CapitaCommunication.GetAllData().OrderBy(_ => _.District).ToList();
             // for testing
             //capitaRecords = capitaRecords.Skip(0).Take(50).ToList();
-            ExcelWriting.ExportRecords(capitaRecords.ToImmutableArray(), @"Capita Export.csv");
+            //ExcelWriting.ExportRecords(capitaRecords.ToImmutableArray(), @"Capita Export.csv");
             //////////////////////////                                     
             Log.Information($"Got { capitaRecords.Count } new Prospects from Capita");
             _crmRecords = NoCrmCommunication.GetAllProspects().ToList();
@@ -29,12 +33,13 @@ namespace NoCRM
             
             var excludedIds = new HashSet<string>(_crmRecords.Select(crm => crm.CapitaId));
             _inserts = capitaRecords.Where(cap => !excludedIds.Contains(cap.Id)).ToList();
-            Log.Information($"{ _inserts.Count() } Prospects are inserts");
+            Log.Information($"{ _inserts.Count } Prospects are inserts");
             
             IList<CapitaProspect> updates = capitaRecords.Where(cap => excludedIds.Contains(cap.Id)).ToList();
-            Log.Information($"{ updates.Count() } Prospects are updates");
+            Log.Information($"{ updates.Count } Prospects are updates");
 
             // Insert Prospects
+            Log.Information($"Inserting { _inserts.Count } Prospects to NoCRM");
             var infiniteLoopBrakeCounter = 0;
             while (_inserts.Any())
             {
@@ -50,23 +55,25 @@ namespace NoCRM
                 if (CrmContainsTargetDistrict)
                 {
                     var targetProspectingListId = GetLastProspectingListIdOfTargetDistrict();
+                    var targetProspectingListTitle = GetLastProspectingListTitleOfTargetDistrict();
                     if (ProspectingListIsFull(targetProspectingListId))
                     {
-                        CreateAllProspectingLists(targetProspectingListId);
+                        CreateAllProspectingLists(targetProspectingListTitle);
                     }
                     else
                     {
-                        var response = AddToProspectingList(targetProspectingListId++);
-                        CreateAllProspectingLists(targetProspectingListId);
+                        var response = AddToProspectingList(targetProspectingListId);
+                        CreateAllProspectingLists(targetProspectingListTitle);
                     }
                 }
                 else
                 {
-                    CreateAllProspectingLists(1);
+                    CreateAllProspectingLists("=>0");
                 }
             }
             
             // Update Prospects
+            Log.Information($"Updating { updates.Count } Prospects to NoCRM");
             foreach (var capitaProspectToUpdate in updates)
             {
                 var crmProspect = _crmRecords.FirstOrDefault(crm => crm.CapitaId == capitaProspectToUpdate.Id);
@@ -78,12 +85,13 @@ namespace NoCRM
         private NoCrmProspect CrmProspectOfTargetDistrict => _crmRecords.FirstOrDefault(x => x.ProspectingListDistrictName == _targetDistrict);
         private int NumberOfRecordsToInsert => _inserts.Count(x => x.District == _targetDistrict);
 
-        private void CreateAllProspectingLists(int newProspectingListId)
+        private void CreateAllProspectingLists(string fullUpProspectingListTitle)
         {
             var bound = (NumberOfRecordsToInsert - 1) / ProspectingListCapacity + 1;
             for (var i = 0; i < bound; i++)
             {
-                var newProspectingListTitle = $"{_targetDistrict} {ExtensionMethods.Separator} {newProspectingListId++}";
+                var newProspectingListNumber = fullUpProspectingListTitle.AfterSeparator() + 1 + i;
+                var newProspectingListTitle = $"{_targetDistrict} {ExtensionMethods.Separator} {newProspectingListNumber}";
                 var cappedRecordsToInsert = GetCappedRecordsToInsert(ProspectingListCapacity);
                 var response = NoCrmCommunication.CreateProspectingList(cappedRecordsToInsert, newProspectingListTitle);
                 RemoveFromInserts(cappedRecordsToInsert);
@@ -116,6 +124,13 @@ namespace NoCRM
             var crmProspectInLastProspectingListForTargetDistrict = _crmRecords.Aggregate((curMax, x) =>
                 x.ProspectingListDistrictName == _targetDistrict && x.ProspectingListDistrictNumber > curMax.ProspectingListDistrictNumber ? x : curMax);
             return crmProspectInLastProspectingListForTargetDistrict.ProspectingListId;
+        }
+        
+        private string GetLastProspectingListTitleOfTargetDistrict()
+        {
+            var crmProspectInLastProspectingListForTargetDistrict = _crmRecords.Aggregate((curMax, x) =>
+                x.ProspectingListDistrictName == _targetDistrict && x.ProspectingListDistrictNumber > curMax.ProspectingListDistrictNumber ? x : curMax);
+            return crmProspectInLastProspectingListForTargetDistrict.ProspectingListTitle;
         }
         
         private int NumberOfProspectsInList(int prospectingListId)

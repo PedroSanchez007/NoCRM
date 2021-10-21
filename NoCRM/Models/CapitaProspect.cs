@@ -59,19 +59,19 @@ namespace NoCRM.Models
     {
         public bool Equals(CapitaProspect x, CapitaProspect y)
         {
-            // if (ReferenceEquals(x, null) || ReferenceEquals(y, null))
-            //     return false;
-            //
-            // if (ReferenceEquals(x, y)) 
-            //     return true;
+            if (ReferenceEquals(x, null) || ReferenceEquals(y, null))
+                return false;
+            
+            if (ReferenceEquals(x, y)) 
+                return true;
 
             return x.Phone == y.Phone;
         }
         
         public int GetHashCode(CapitaProspect capitaProspect)
         {
+            // Do not change this hashing algorith as it allows us to remove duplicates based on phone.
             var hashPhone = capitaProspect.Phone.GetHashCode();
-            // var hashName = record.Name.GetHashCode();
 
             return hashPhone;           
         }
