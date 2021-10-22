@@ -38,6 +38,7 @@ namespace NoCRM
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
             var configuration = builder.Build();
+            AppSettings = new AppSettings();
             ConfigurationBinder.Bind(configuration.GetSection("AppSettings"), AppSettings);
         }
 
