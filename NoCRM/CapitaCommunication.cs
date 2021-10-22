@@ -8,9 +8,10 @@ namespace NoCRM
     public static class CapitaCommunication
     {
         private const string WebDomain = @"https://capitalead.gndex.com/api/v2/";
-        private static readonly KeyValuePair<string, string> ApiKey = new ("key", "b4e6dda1-806b-4627-8fbc-d1fdea846f42");
-        private const string AllData = @"alldata";
-        private const string NewData = @"newdata";
+        private const string AllData = "alldata";
+        private const string NewData = "newdata";
+
+        private static readonly KeyValuePair<string, string> ApiKey = new (Program.AppSettings.CapitaApiKeyName, Program.AppSettings.CapitaApiKey);
 
         public static IEnumerable<CapitaProspect> GetNewData()
         {

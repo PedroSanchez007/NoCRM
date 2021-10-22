@@ -21,6 +21,7 @@ namespace NoCRM
         public Sync()
         {
             var capitaRecords = CapitaCommunication.GetNewData().OrderByDescending(_ => _.District).ToList();
+            var test = NoCrmCommunication.Ping();
             // for testing
             //capitaRecords = capitaRecords.Skip(0).Take(50).ToList();
             //ExcelWriting.ExportRecords(capitaRecords.ToImmutableArray(), @"Capita Export.csv");
