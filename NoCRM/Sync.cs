@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 using NoCRM.Models;
 using Serilog;
@@ -8,7 +7,7 @@ namespace NoCRM
 {
     public class Sync
     {
-        public static string Separator => "-";
+        public static string Separator => "_";
         // 1. Don't forget to turn on one second delay after testing.
 
         private const int ProspectingListCapacity = 4999;
@@ -21,7 +20,7 @@ namespace NoCRM
         
         public Sync()
         {
-            var capitaRecords = CapitaCommunication.GetNewData().OrderBy(_ => _.District).ToList();
+            var capitaRecords = CapitaCommunication.GetNewData().OrderByDescending(_ => _.District).ToList();
             // for testing
             //capitaRecords = capitaRecords.Skip(0).Take(50).ToList();
             //ExcelWriting.ExportRecords(capitaRecords.ToImmutableArray(), @"Capita Export.csv");
@@ -34,8 +33,21 @@ namespace NoCRM
             _inserts = capitaRecords.Where(cap => !excludedIds.Contains(cap.Id)).ToList();
             Log.Information($"{ _inserts.Count } Prospects are inserts");
             
-            IList<CapitaProspect> updates = capitaRecords.Where(cap => excludedIds.Contains(cap.Id)).ToList();
-            Log.Information($"{ updates.Count } Prospects are updates");
+            IList<CapitaProspect> alreadyInCrmRecords = capitaRecords.Where(cap => excludedIds.Contains(cap.Id)).ToList();
+            Log.Information($"{ alreadyInCrmRecords.Count } Prospects are already in NoCRM");
+
+            var updates = new List<CapitaProspect>();
+            foreach (var capitalRecord in alreadyInCrmRecords)
+            {
+                var matchingCrmRecord = _crmRecords.FirstOrDefault(_ => _.CapitaId == capitalRecord.Id);
+                var fieldThatDoesNotMatch = capitalRecord.FieldDoesNotMatch(matchingCrmRecord);
+                if (fieldThatDoesNotMatch != string.Empty)
+                {
+                    updates.Add(capitalRecord);
+                    Log.Information($"NoCrm [ProspectingList: {matchingCrmRecord.ProspectingListTitle}] does not match Capita Prospect [CapitaId: {capitalRecord.Id}, Nom: {matchingCrmRecord.Name}] because field {fieldThatDoesNotMatch} is different:");
+                    //Log.Information($"NoCrm [ProspectingList: {matchingCrmRecord.ProspectingListTitle}, ProspectingListId: {matchingCrmRecord.ProspectingListId}, ProspectId: {matchingCrmRecord.Id}] does not match Capita Prospect [CapitaId: {capitalRecord.Id}, Nom: {matchingCrmRecord.Name}] because field {fieldThatDoesNotMatch} is different:");
+                }
+            }
 
             // Insert Prospects
             Log.Information($"Inserting { _inserts.Count } Prospects to NoCRM");
@@ -67,7 +79,7 @@ namespace NoCRM
                 }
                 else
                 {
-                    CreateAllProspectingLists("=>0");
+                    CreateAllProspectingLists($"{Separator} 0");
                 }
             }
             

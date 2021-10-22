@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 
 namespace NoCRM.Models
 {
@@ -52,6 +53,47 @@ namespace NoCRM.Models
                 ParseDate.ToString("d"),
                 Status ?? string.Empty
             };
+        }
+        
+        public bool IsMatch(NoCrmProspect crmProspect)
+        {
+            return
+                Name.IsMatch(crmProspect.Name) &&
+                Category.IsMatch(crmProspect.Category) &&
+                Date.ToString(CultureInfo.InvariantCulture).IsMatch(crmProspect.Date.ToString(CultureInfo.InvariantCulture)) &&
+                Type.IsMatch(crmProspect.Type) &&
+                Surface.ToString().IsMatch(crmProspect.Surface.ToString()) &&
+                Rooms.ToString().IsMatch(crmProspect.Name.ToString()) &&
+                EnergyClass.IsMatch(crmProspect.EnergyClass) &&
+                LocalisationTown.IsMatch(crmProspect.LocalisationTown) &&
+                Department.IsMatch(crmProspect.Department) &&
+                District.IsMatch(crmProspect.District) &&
+                Index.IsMatch(crmProspect.Index) &&
+                Cost.IsMatch(crmProspect.Cost) &&
+                Phone.IsMatch(crmProspect.Phone) &&
+                ParseDate.ToString().IsMatch(crmProspect.ParseDate.ToString()) &&
+                Status.IsMatch(crmProspect.Status);
+        }
+        
+        public string FieldDoesNotMatch(NoCrmProspect crmProspect)
+        {
+            if (!Name.IsMatch(crmProspect.Name)) return $"Field name: {nameof(Name)}, Capita: {Name}, NoCRM: {crmProspect.Name}";
+            if (!Category.IsMatch(crmProspect.Category)) return $"Field name: {nameof(Category)}, Capita: {Category}, NoCRM: {crmProspect.Category}";
+            if (!Date.ToString(CultureInfo.InvariantCulture).IsMatch(crmProspect.Date.ToString(CultureInfo.InvariantCulture))) return $"Field name: {nameof(Date)}, Capita: {Date}, NoCRM: {crmProspect.Date}";
+            if (!Type.IsMatch(crmProspect.Type)) return $"Field name: {nameof(Type)}, Capita: {Type}, NoCRM: {crmProspect.Type}";
+            if (!Surface.ToString().IsMatch(crmProspect.Surface.ToString())) return $"Field name: {nameof(Surface)}, Capita: {Surface}, NoCRM: {crmProspect.Surface}";
+            if (!Rooms.ToString().IsMatch(crmProspect.Rooms.ToString())) return $"Field name: {nameof(Rooms)}, Capita: {Rooms}, NoCRM: {crmProspect.Rooms}";
+            if (!EnergyClass.IsMatch(crmProspect.EnergyClass)) return $"Field name: {nameof(EnergyClass)}, Capita: {EnergyClass}, NoCRM: {crmProspect.EnergyClass}";
+            if (!LocalisationTown.IsMatch(crmProspect.LocalisationTown)) return $"Field name: {nameof(LocalisationTown)}, Capita: {LocalisationTown}, NoCRM: {crmProspect.LocalisationTown}";
+            if (!Department.IsMatch(crmProspect.Department)) return $"Field name: {nameof(Department)}, Capita: {Department}, NoCRM: {crmProspect.Department}";
+            if (!District.IsMatch(crmProspect.District)) return $"Field name: {nameof(District)}, Capita: {District}, NoCRM: {crmProspect.District}";
+            if (!Index.IsMatch(crmProspect.Index)) return $"Field name: {nameof(Index)}, Capita: {Index}, NoCRM: {crmProspect.Index}";
+            if (!Cost.IsMatch(crmProspect.Cost)) return $"Field name: {nameof(Cost)}, Capita: {Cost}, NoCRM: {crmProspect.Cost}";
+            if (!Phone.IsMatch(crmProspect.Phone)) return $"Field name: {nameof(Phone)}, Capita: {Phone}, NoCRM: {crmProspect.Phone}";
+            if (!ParseDate.ToString().IsMatch(crmProspect.ParseDate.ToString())) return $"Field name: {nameof(ParseDate)}, Capita: {ParseDate}, NoCRM: {crmProspect.ParseDate}";
+            if (!Status.IsMatch(crmProspect.Status)) return $"Field name: {nameof(Status)}, Capita: {Status}, NoCRM: {crmProspect.Status}";
+
+            return string.Empty;
         }
     }
 

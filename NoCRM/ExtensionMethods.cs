@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Globalization;
+using System.Net.Http.Headers;
+using NoCRM.Models;
 
 namespace NoCRM
 {
@@ -35,6 +37,20 @@ namespace NoCRM
                 return default;
 
             return number;
+        }
+
+        public static bool IsMatch(this string apple, string orange)
+        {
+            if (apple == null && orange == null ||
+                apple == null && orange == string.Empty ||
+                apple == string.Empty && orange == null)
+                return true;
+            
+            if (apple == null || orange == null) 
+                return false;
+            
+            return
+                string.Equals(apple.Trim(), orange.Trim(), StringComparison.CurrentCultureIgnoreCase);
         }
     }
 }

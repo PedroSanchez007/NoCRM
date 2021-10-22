@@ -21,7 +21,7 @@ namespace NoCRM
         {
             return GetData(AllData);
         }
-        
+
         private static IEnumerable<CapitaProspect> GetData(string endPoint)
         {
             var capitaCommunication = new HttpCommunication(WebDomain, ApiKey);
