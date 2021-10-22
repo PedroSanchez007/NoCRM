@@ -36,13 +36,9 @@ namespace NoCRM
         {
             var builder = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-                .AddUserSecrets<AppSettings>()
-                .AddEnvironmentVariables(); 
-
+                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
             var configuration = builder.Build();
-            AppSettings = new AppSettings();
-            configuration.GetSection("AppSettings").Bind(AppSettings);
+            ConfigurationBinder.Bind(configuration.GetSection("AppSettings"), AppSettings);
         }
 
         private static void ConfigureLogger()
