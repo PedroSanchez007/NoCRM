@@ -1,17 +1,10 @@
 ﻿using System;
 using System.Globalization;
-using System.Net.Http.Headers;
-using NoCRM.Models;
 
 namespace NoCRM
 {
     public static class ExtensionMethods
     {
-        public static string NowFormatted()
-        {
-            return DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
-        }
-        
         public static string BeforeSeparator(this string input)
         {
             if (input == null)
@@ -48,6 +41,9 @@ namespace NoCRM
             
             if (apple == null || orange == null) 
                 return false;
+            
+            if (orange.Contains("&amp"))
+                return true;
             
             return
                 string.Equals(apple.Trim(), orange.Trim(), StringComparison.CurrentCultureIgnoreCase);

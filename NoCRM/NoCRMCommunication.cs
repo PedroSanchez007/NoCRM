@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using Newtonsoft.Json;
 using NoCRM.Models;
@@ -38,14 +39,14 @@ namespace NoCRM
         {
             var httpCommunication = new HttpCommunication(NoCrmWebDomain, ApiKey);
             var data = httpCommunication.MakeGetRequest(ProspectingListsEndpoint);
-            return JsonConvert.DeserializeObject<List<ProspectingList>>(data);
+            return JsonConvert.DeserializeObject<List<ProspectingList>>(data, new JsonSerializerSettings(){ Culture = new CultureInfo("en-GB") });
         }
         private static ProspectingList GetProspectingList(int prospectingListId)
         {
             var httpCommunication = new HttpCommunication(NoCrmWebDomain, ApiKey);
             var endpoint = $"{ProspectingListsEndpoint}/{prospectingListId}"; 
             var data = httpCommunication.MakeGetRequest(endpoint);
-            return JsonConvert.DeserializeObject<ProspectingList>(data);
+            return JsonConvert.DeserializeObject<ProspectingList>(data, new JsonSerializerSettings(){ Culture = new CultureInfo("en-GB") });
         }
         private static IEnumerable<ProspectingList> GetProspectingListsOfProspects(IEnumerable<int> prospectingListIds)
         {
@@ -57,11 +58,11 @@ namespace NoCRM
             var prospectingListPost = new ProspectingListPost(capitaProspects, newListTitle);
             return httpCommunication.MakePostRequest(ProspectingListsEndpoint, prospectingListPost);
         }
-        public static string AddProspectsToProspectingList(int prospectingListId, List<CapitaProspect> capitaProspects)
+        public static string AddProspectsToProspectingList(int prospectingListId, IEnumerable<CapitaProspect> capitaProspects)
         {
             var httpCommunication = new HttpCommunication(NoCrmWebDomain, ApiKey);
             var endpoint = $"{ProspectingListsEndpoint}/{prospectingListId}/rows"; 
-            var prospectingListPost = new ProspectingListPost(capitaProspects);
+            var prospectingListPost = new ProspectingListAddPost(capitaProspects);
             return httpCommunication.MakePostRequest(endpoint, prospectingListPost);
         }
         public static string UpdateProspect(int prospectingListId, int prospectId, CapitaProspect capitaProspect)

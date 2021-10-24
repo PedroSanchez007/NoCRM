@@ -1,6 +1,4 @@
-﻿using System.Collections.Immutable;
-using System.IO;
-using System.Linq;
+﻿using System.IO;
 using Microsoft.Extensions.Configuration;
 using Serilog;
 
@@ -39,7 +37,7 @@ namespace NoCRM
                 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
             var configuration = builder.Build();
             AppSettings = new AppSettings();
-            ConfigurationBinder.Bind(configuration.GetSection("AppSettings"), AppSettings);
+            configuration.GetSection("AppSettings").Bind(AppSettings);
         }
 
         private static void ConfigureLogger()

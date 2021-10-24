@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="cf240237-5d16-49ac-8d1c-19fef7e487a2" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/NoCRM/HttpRequestInfo.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/NoCRM/Models/ProspectingListAddPost.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/NoCRM.sln.DotSettings.user" beforeDir="false" afterPath="$PROJECT_DIR$/NoCRM.sln.DotSettings.user" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/NoCRM/CapitaCommunication.cs" beforeDir="false" afterPath="$PROJECT_DIR$/NoCRM/CapitaCommunication.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/NoCRM/DataTypeConversions.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/NoCRM/ExcelWriting.cs" beforeDir="false" afterPath="$PROJECT_DIR$/NoCRM/ExcelWriting.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/NoCRM/ExtensionMethods.cs" beforeDir="false" afterPath="$PROJECT_DIR$/NoCRM/ExtensionMethods.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/NoCRM/HttpCommunication.cs" beforeDir="false" afterPath="$PROJECT_DIR$/NoCRM/HttpCommunication.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/NoCRM/Models/CapitaProspect.cs" beforeDir="false" afterPath="$PROJECT_DIR$/NoCRM/Models/CapitaProspect.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/NoCRM/Models/NoCrmProspect.cs" beforeDir="false" afterPath="$PROJECT_DIR$/NoCRM/Models/NoCrmProspect.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/NoCRM/Models/ProspectingList.cs" beforeDir="false" afterPath="$PROJECT_DIR$/NoCRM/Models/ProspectingList.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/NoCRM/NoCRMCommunication.cs" beforeDir="false" afterPath="$PROJECT_DIR$/NoCRM/NoCRMCommunication.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/NoCRM/Program.cs" beforeDir="false" afterPath="$PROJECT_DIR$/NoCRM/Program.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/NoCRM/Sync.cs" beforeDir="false" afterPath="$PROJECT_DIR$/NoCRM/Sync.cs" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProjectId" id="1zwu9SYdbu5AP6sS4l1tBsUbdlD" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="vue.rearranger.settings.migration" value="true" />
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="cf240237-5d16-49ac-8d1c-19fef7e487a2" name="Changes" comment="" />
+      <created>1635071321581</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1635071321581</updated>
+      <workItem from="1635071325376" duration="3000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+</project>

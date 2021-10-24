@@ -11,7 +11,7 @@ namespace NoCRM
         {
             var exportFilePath = Path.Combine(ExportDirectory, exportFileName);
             using var writer = new StreamWriter(exportFilePath);
-            using var csv = new CsvWriter(writer, new CultureInfo("en-GB"));
+            using var csv = new CsvWriter(writer, CultureInfo.CurrentCulture);
             csv.WriteRecords(records);
         }
 

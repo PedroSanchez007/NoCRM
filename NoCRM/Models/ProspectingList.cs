@@ -17,7 +17,7 @@ namespace NoCRM.Models
         public string Permalink { get; set; }
         public ProspectDump[] Spreadsheet_rows { get; set; }
 
-        public List<NoCrmProspect> AsCrmProspects()
+        public IEnumerable<NoCrmProspect> AsCrmProspects()
         {
             return Spreadsheet_rows.Select(p => new NoCrmProspect(Id, Title, p.Id, p.Content)).ToList();
         }

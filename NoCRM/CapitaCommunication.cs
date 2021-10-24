@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Globalization;
 using System.Linq;
 using Newtonsoft.Json;
 using NoCRM.Models;
@@ -27,9 +29,8 @@ namespace NoCRM
         {
             var capitaCommunication = new HttpCommunication(WebDomain, ApiKey);
             var data = capitaCommunication.MakeGetRequest(endPoint);
-            var newRecords = JsonConvert.DeserializeObject<List<CapitaProspect>>(data);
+            var newRecords = JsonConvert.DeserializeObject<List<CapitaProspect>>(data, new JsonSerializerSettings(){ Culture = new CultureInfo("en-US") });
             var qualifyingNewRecords = newRecords?.Where(r => r.Category == "Rent" && r.Phone != null).Distinct(new RecordComparer());
-
             return qualifyingNewRecords;
         }
     }

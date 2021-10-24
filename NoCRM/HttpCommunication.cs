@@ -1,14 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Net.Mime;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Web;
-using Newtonsoft.Json;
 using Serilog;
 
 namespace NoCRM
@@ -29,34 +24,24 @@ namespace NoCRM
         
         public string MakeGetRequest(string endPoint, Dictionary<string, string> queryParameters = null)
         {
-            var queryString = GetQueryString(queryParameters);
-            var endPointUrl = endPoint + queryString;
-            return DoRequest(HttpMethod.Get, endPointUrl);
+            var httpRequestInfo = new HttpRequestInfo(HttpMethod.Get, endPoint, _apiKey, queryParameters);
+            return DoRequest(httpRequestInfo);
         }
         
         public string MakePostRequest(string endPoint, object postParameters)
         {
-            var queryString = GetQueryString(queryParameters: null);
-            // Maybe I should receive parameters and jsonify them here
-            
-            var endPointUrl = endPoint + queryString;
-            return DoRequest(HttpMethod.Post, endPointUrl, postParameters);
+            var httpRequestInfo = new HttpRequestInfo(HttpMethod.Post, endPoint, postParameters, _apiKey);
+            return DoRequest(httpRequestInfo);
         }
         public string MakePutRequest(string endPoint, object putParameters)
         {
-            var queryString = GetQueryString(queryParameters: null);
-            // Maybe I should receive parameters and jsonify them here
-            
-            var endPointUrl = endPoint + queryString;
-            return DoRequest(HttpMethod.Put, endPointUrl, putParameters);
+            var httpRequestInfo = new HttpRequestInfo(HttpMethod.Put, endPoint, putParameters, _apiKey);
+            return DoRequest(httpRequestInfo);
         }
         
-        private string DoRequest(HttpMethod httpMethod, string endPoint, object parameters = default)
+        private string DoRequest(HttpRequestInfo requestInfo)
         {
-            var json = JsonConvert.SerializeObject(parameters);
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
-            
-            var httpTask = GetHttpTask(httpMethod, endPoint, content);
+            var httpTask = GetHttpTask(requestInfo);
             var result = httpTask.GetAwaiter().GetResult();
 
             // A one second delay is necessary for NoCRM not to groan. Speed is not really an issue as this is a daily process.
@@ -65,24 +50,22 @@ namespace NoCRM
             if (result.IsSuccessStatusCode)
                 return result.Content.ReadAsStringAsync().Result;
 
-            if (ErrorHandling(httpMethod, endPoint, result))
+            if (ErrorHandling(requestInfo, result))
                 Environment.Exit((int)result.StatusCode);
-            
             return string.Empty;
         }
 
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="httpMethod"></param>
-        /// <param name="endPoint"></param>
+        /// <param name="requestInfo"></param>
         /// <param name="response"></param>
         /// <returns>Whether the error is fatal</returns>
-        private bool ErrorHandling(HttpMethod httpMethod, string endPoint, HttpResponseMessage response)
+        private bool ErrorHandling(HttpRequestInfo requestInfo, HttpResponseMessage response)
         {
-            Log.Error($"Http Request to { _client.BaseAddress + endPoint} failed with error code { response.StatusCode }");
+            Log.Error($"Http Request to { _client.BaseAddress } with parameters { requestInfo } failed with error code { response.StatusCode }");
 
-            if (httpMethod == HttpMethod.Put && response.StatusCode == HttpStatusCode.BadRequest)
+            if (requestInfo.HttpMethod == HttpMethod.Put && response.StatusCode == HttpStatusCode.BadRequest)
             {
                 Log.Error($"The error occurs when the data sent to update the CRM does not match the number of fields in the table that is being updated. Although it could be something else.");
                 return true;
@@ -97,39 +80,17 @@ namespace NoCRM
             return false;
         }
 
-        private ConfiguredTaskAwaitable<HttpResponseMessage> GetHttpTask(HttpMethod httpMethod, string endpoint, HttpContent content = null)
+        private ConfiguredTaskAwaitable<HttpResponseMessage> GetHttpTask(HttpRequestInfo requestInfo)
         {
-            if (content == null && new[] { "Post", "Put", "Patch" }.Contains(httpMethod.ToString()))
-                throw new ArgumentException($"No content was passed to HTTP call { httpMethod }");
-
-            return httpMethod.ToString() switch
+            return requestInfo.HttpMethod.ToString() switch
             {
-                "GET" => _client.GetAsync(endpoint).ConfigureAwait(false),
-                "POST" => _client.PostAsync(endpoint, content).ConfigureAwait(false),
-                "PUT" => _client.PutAsync(endpoint, content).ConfigureAwait(false),
-                "PATCH" => _client.PatchAsync(endpoint, content).ConfigureAwait(false),
-                "DELETE" => _client.DeleteAsync(endpoint).ConfigureAwait(false),
+                "GET" => _client.GetAsync(requestInfo.QueryString).ConfigureAwait(false),
+                "POST" => _client.PostAsync(requestInfo.QueryString, requestInfo.Content).ConfigureAwait(false),
+                "PUT" => _client.PutAsync(requestInfo.QueryString, requestInfo.Content).ConfigureAwait(false),
+                "PATCH" => _client.PatchAsync(requestInfo.QueryString, requestInfo.Content).ConfigureAwait(false),
+                "DELETE" => _client.DeleteAsync(requestInfo.QueryString).ConfigureAwait(false),
                 _ => default
             };
-        }
-
-        private string GetQueryString(Dictionary<string, string> queryParameters = null)
-        {
-            var query = HttpUtility.ParseQueryString(string.Empty);
-            if (!string.IsNullOrEmpty(_apiKey.Key) && !string.IsNullOrEmpty(_apiKey.Value))
-            {
-                query[_apiKey.Key] = _apiKey.Value;
-            }
-
-            if (queryParameters != null)
-            {
-                foreach (var (key, value) in queryParameters)
-                {
-                    query[key] = value;
-                }                
-            }
-
-            return query.HasKeys() ? "?" + query : string.Empty;
         }
     }
 }

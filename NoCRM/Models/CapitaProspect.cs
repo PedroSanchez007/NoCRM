@@ -39,7 +39,7 @@ namespace NoCRM.Models
                 Name ?? string.Empty,
                 Id ?? string.Empty,
                 Category ?? string.Empty,
-                Date.ToString("d"),
+                Date.ToString("d", new CultureInfo("en-GB")),
                 Type ?? string.Empty,
                 Surface.ToString(),
                 Rooms.ToString(),
@@ -50,36 +50,18 @@ namespace NoCRM.Models
                 Index ?? string.Empty,
                 Cost ?? string.Empty,
                 Phone ?? string.Empty,
-                ParseDate.ToString("d"),
+                ParseDate.ToString("d", new CultureInfo("en-GB")),
                 Status ?? string.Empty
             };
         }
         
-        public bool IsMatch(NoCrmProspect crmProspect)
-        {
-            return
-                Name.IsMatch(crmProspect.Name) &&
-                Category.IsMatch(crmProspect.Category) &&
-                Date.ToString(CultureInfo.InvariantCulture).IsMatch(crmProspect.Date.ToString(CultureInfo.InvariantCulture)) &&
-                Type.IsMatch(crmProspect.Type) &&
-                Surface.ToString().IsMatch(crmProspect.Surface.ToString()) &&
-                Rooms.ToString().IsMatch(crmProspect.Name.ToString()) &&
-                EnergyClass.IsMatch(crmProspect.EnergyClass) &&
-                LocalisationTown.IsMatch(crmProspect.LocalisationTown) &&
-                Department.IsMatch(crmProspect.Department) &&
-                District.IsMatch(crmProspect.District) &&
-                Index.IsMatch(crmProspect.Index) &&
-                Cost.IsMatch(crmProspect.Cost) &&
-                Phone.IsMatch(crmProspect.Phone) &&
-                ParseDate.ToString().IsMatch(crmProspect.ParseDate.ToString()) &&
-                Status.IsMatch(crmProspect.Status);
-        }
-        
         public string FieldDoesNotMatch(NoCrmProspect crmProspect)
         {
+            // There is no need to check Capital Id because by definition they are the same.
+            // Do not check ParseData because a newer version does not mean that the data has changed.
             if (!Name.IsMatch(crmProspect.Name)) return $"Field name: {nameof(Name)}, Capita: {Name}, NoCRM: {crmProspect.Name}";
             if (!Category.IsMatch(crmProspect.Category)) return $"Field name: {nameof(Category)}, Capita: {Category}, NoCRM: {crmProspect.Category}";
-            if (!Date.ToString(CultureInfo.InvariantCulture).IsMatch(crmProspect.Date.ToString(CultureInfo.InvariantCulture))) return $"Field name: {nameof(Date)}, Capita: {Date}, NoCRM: {crmProspect.Date}";
+            if (!Date.ToString(new CultureInfo("en-GB")).IsMatch(crmProspect.Date.ToString(new CultureInfo("en-GB")))) return $"Field name: {nameof(Date)}, Capita: {Date}, NoCRM: {crmProspect.Date}";
             if (!Type.IsMatch(crmProspect.Type)) return $"Field name: {nameof(Type)}, Capita: {Type}, NoCRM: {crmProspect.Type}";
             if (!Surface.ToString().IsMatch(crmProspect.Surface.ToString())) return $"Field name: {nameof(Surface)}, Capita: {Surface}, NoCRM: {crmProspect.Surface}";
             if (!Rooms.ToString().IsMatch(crmProspect.Rooms.ToString())) return $"Field name: {nameof(Rooms)}, Capita: {Rooms}, NoCRM: {crmProspect.Rooms}";
@@ -90,7 +72,6 @@ namespace NoCRM.Models
             if (!Index.IsMatch(crmProspect.Index)) return $"Field name: {nameof(Index)}, Capita: {Index}, NoCRM: {crmProspect.Index}";
             if (!Cost.IsMatch(crmProspect.Cost)) return $"Field name: {nameof(Cost)}, Capita: {Cost}, NoCRM: {crmProspect.Cost}";
             if (!Phone.IsMatch(crmProspect.Phone)) return $"Field name: {nameof(Phone)}, Capita: {Phone}, NoCRM: {crmProspect.Phone}";
-            if (!ParseDate.ToString().IsMatch(crmProspect.ParseDate.ToString())) return $"Field name: {nameof(ParseDate)}, Capita: {ParseDate}, NoCRM: {crmProspect.ParseDate}";
             if (!Status.IsMatch(crmProspect.Status)) return $"Field name: {nameof(Status)}, Capita: {Status}, NoCRM: {crmProspect.Status}";
 
             return string.Empty;
@@ -112,7 +93,7 @@ namespace NoCRM.Models
         
         public int GetHashCode(CapitaProspect capitaProspect)
         {
-            // Do not change this hashing algorith as it allows us to remove duplicates based on phone.
+            // Do not change this hashing algorithm as it allows us to remove duplicates based on phone.
             var hashPhone = capitaProspect.Phone.GetHashCode();
 
             return hashPhone;           

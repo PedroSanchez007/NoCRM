@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Globalization;
 using System.Linq;
 using NoCRM.Models;
 using Serilog;
@@ -8,10 +10,8 @@ namespace NoCRM
     public class Sync
     {
         public static string Separator => "_";
-        // 1. Don't forget to turn on one second delay after testing.
-
         private const int ProspectingListCapacity = 4999;
-        //private const int ProspectingListCapacity = 2;
+        private const int MaxInsertCount = 100;
 
         private readonly List<NoCrmProspect> _crmRecords;
         private readonly List<CapitaProspect> _inserts;
@@ -21,14 +21,16 @@ namespace NoCRM
         public Sync()
         {
             var capitaRecords = CapitaCommunication.GetNewData().OrderByDescending(_ => _.District).ToList();
-            var test = NoCrmCommunication.Ping();
-            // for testing
-            //capitaRecords = capitaRecords.Skip(0).Take(50).ToList();
+            
+            ////////////////////////////////////// for testing
+            //var test = NoCrmCommunication.Ping();
+            //capitaRecords = capitaRecords.Skip(0).Take(6000).ToList();
             //ExcelWriting.ExportRecords(capitaRecords.ToImmutableArray(), @"Capita Export.csv");
-            //////////////////////////                                     
+            //////////////////////////////////////
+             
             Log.Information($"Got { capitaRecords.Count } new Prospects from Capita");
             _crmRecords = NoCrmCommunication.GetAllProspects().ToList();
-            Log.Information($"Got { _crmRecords.Count() } Prospects from NoCRM");
+            Log.Information($"Got { _crmRecords.Count } Prospects from NoCRM");
             
             var excludedIds = new HashSet<string>(_crmRecords.Select(crm => crm.CapitaId));
             _inserts = capitaRecords.Where(cap => !excludedIds.Contains(cap.Id)).ToList();
@@ -40,13 +42,12 @@ namespace NoCRM
             var updates = new List<CapitaProspect>();
             foreach (var capitalRecord in alreadyInCrmRecords)
             {
-                var matchingCrmRecord = _crmRecords.FirstOrDefault(_ => _.CapitaId == capitalRecord.Id);
+                var matchingCrmRecord = _crmRecords.First(_ => _.CapitaId == capitalRecord.Id);
                 var fieldThatDoesNotMatch = capitalRecord.FieldDoesNotMatch(matchingCrmRecord);
                 if (fieldThatDoesNotMatch != string.Empty)
                 {
                     updates.Add(capitalRecord);
-                    Log.Information($"NoCrm [ProspectingList: {matchingCrmRecord.ProspectingListTitle}] does not match Capita Prospect [CapitaId: {capitalRecord.Id}, Nom: {matchingCrmRecord.Name}] because field {fieldThatDoesNotMatch} is different:");
-                    //Log.Information($"NoCrm [ProspectingList: {matchingCrmRecord.ProspectingListTitle}, ProspectingListId: {matchingCrmRecord.ProspectingListId}, ProspectId: {matchingCrmRecord.Id}] does not match Capita Prospect [CapitaId: {capitalRecord.Id}, Nom: {matchingCrmRecord.Name}] because field {fieldThatDoesNotMatch} is different:");
+                    Log.Information($"NoCrm [ProspectingList: {matchingCrmRecord.ProspectingListTitle}] does not match Capita Prospect [CapitaId: {capitalRecord.Id}, Nom: {matchingCrmRecord.Name}] because {fieldThatDoesNotMatch} is different:");
                 }
             }
 
@@ -74,7 +75,7 @@ namespace NoCRM
                     }
                     else
                     {
-                        var response = AddToProspectingList(targetProspectingListId);
+                        AddToProspectingList(targetProspectingListId);
                         CreateAllProspectingLists(targetProspectingListTitle);
                     }
                 }
@@ -99,6 +100,9 @@ namespace NoCRM
 
         private void CreateAllProspectingLists(string fullUpProspectingListTitle)
         {
+            if (NumberOfRecordsToInsert <= 0)
+                return;
+            
             var bound = (NumberOfRecordsToInsert - 1) / ProspectingListCapacity + 1;
             for (var i = 0; i < bound; i++)
             {
@@ -110,13 +114,19 @@ namespace NoCRM
             }
         }
         
-        private string AddToProspectingList(int prospectingListId)
+        private void AddToProspectingList(int prospectingListId)
         {
             var remainingListCapacity = GetRemainingListCapacity(prospectingListId);
-            var cappedRecordsToInsert = GetCappedRecordsToInsert(remainingListCapacity);
-            var response =  NoCrmCommunication.AddProspectsToProspectingList(prospectingListId, cappedRecordsToInsert);
-            RemoveFromInserts(cappedRecordsToInsert);
-            return response;
+            while (remainingListCapacity > 0)
+            {
+                var recordsToInsertCount = remainingListCapacity > MaxInsertCount ? MaxInsertCount : remainingListCapacity;
+                var cappedRecordsToInsert = GetCappedRecordsToInsert(recordsToInsertCount);
+                if (!cappedRecordsToInsert.Any())
+                    break;
+                var response =  NoCrmCommunication.AddProspectsToProspectingList(prospectingListId, cappedRecordsToInsert);
+                RemoveFromInserts(cappedRecordsToInsert);
+                remainingListCapacity -= cappedRecordsToInsert.Count;
+            }
         }
         
         private List<CapitaProspect> GetCappedRecordsToInsert(int numberOfRecordsToInsert)
@@ -134,25 +144,25 @@ namespace NoCRM
         private int GetLastProspectingListIdOfTargetDistrict()
         {
             var crmProspectInLastProspectingListForTargetDistrict = _crmRecords.Aggregate((curMax, x) =>
-                x.ProspectingListDistrictName == _targetDistrict && x.ProspectingListDistrictNumber > curMax.ProspectingListDistrictNumber ? x : curMax);
+                x.ProspectingListDistrictName == _targetDistrict && x.ProspectingListDistrictNumber >= curMax.ProspectingListDistrictNumber ? x : curMax);
             return crmProspectInLastProspectingListForTargetDistrict.ProspectingListId;
         }
         
         private string GetLastProspectingListTitleOfTargetDistrict()
         {
             var crmProspectInLastProspectingListForTargetDistrict = _crmRecords.Aggregate((curMax, x) =>
-                x.ProspectingListDistrictName == _targetDistrict && x.ProspectingListDistrictNumber > curMax.ProspectingListDistrictNumber ? x : curMax);
+                x.ProspectingListDistrictName == _targetDistrict && x.ProspectingListDistrictNumber >= curMax.ProspectingListDistrictNumber ? x : curMax);
             return crmProspectInLastProspectingListForTargetDistrict.ProspectingListTitle;
         }
         
         private int NumberOfProspectsInList(int prospectingListId)
         {
-            return _crmRecords.Select(x => x.ProspectingListId == prospectingListId).Count();
+            return _crmRecords.Count(x => x.ProspectingListId == prospectingListId);
         }
         
         private bool ProspectingListIsFull(int prospectingListId)
         {
-            return _crmRecords.Select(x => x.ProspectingListId == prospectingListId).Count() >= ProspectingListCapacity;
+            return _crmRecords.Count(x => x.ProspectingListId == prospectingListId) >= ProspectingListCapacity;
         }
 
         private void RemoveFromInserts(IEnumerable<CapitaProspect> prospectsToRemove)
