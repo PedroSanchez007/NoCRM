@@ -14,7 +14,7 @@ namespace NoCRM
             // Code to export all data to Excel. It will go to MyDocuments/All NoCRM Data.csv
             // Uncomment the following two lines to export the data.
             // var allNoCrmRecords = NoCrmCommunication.GetAllProspects().ToList();
-            // ExcelWriting.ExportRecords(allNoCrmRecords.ToImmutableArray(), @"All NoCRM Data.csv");
+            // ExcelWriting.ExportRecords(allNoCrmRecords.ToImmutableArray(), @"All NoCRM Data.csv");.
             ////////////////////////////////////////////////////////////////////////////////////////////////
             
             ////////////////////////////////////////////////////////////////////////////////////////////////
