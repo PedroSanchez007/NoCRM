@@ -62,8 +62,7 @@ namespace NoCRM
                     break;
                 }
 
-                // I haven't tested this yet
-                _targetDistrict = _inserts.First().District;
+                _targetDistrict = _inserts.First().PrefixedDistrict;
                 _crmProspectOfTargetDistrict = CrmProspectOfTargetDistrict;
                 if (CrmContainsTargetDistrict)
                 {
@@ -96,7 +95,7 @@ namespace NoCRM
 
         private bool CrmContainsTargetDistrict => _crmProspectOfTargetDistrict != null;
         private NoCrmProspect CrmProspectOfTargetDistrict => _crmRecords.FirstOrDefault(x => x.ProspectingListDistrictName == _targetDistrict);
-        private int NumberOfRecordsToInsert => _inserts.Count(x => x.District == _targetDistrict);
+        private int NumberOfRecordsToInsert => _inserts.Count(x => x.PrefixedDistrict == _targetDistrict);
 
         private void CreateAllProspectingLists(string fullUpProspectingListTitle)
         {
@@ -132,7 +131,7 @@ namespace NoCRM
         private List<CapitaProspect> GetCappedRecordsToInsert(int numberOfRecordsToInsert)
         {
             return _inserts
-                .Where(x => x.District == _targetDistrict)
+                .Where(x => x.PrefixedDistrict == _targetDistrict)
                 .Take(numberOfRecordsToInsert).ToList();
         }
 

@@ -32,7 +32,9 @@ namespace NoCRM
         public static IEnumerable<NoCrmProspect> GetAllProspects()
         {
             var prospectingListsWithoutProspects = GetProspectingLists();
-            var prospectingLists = GetProspectingListsOfProspects(prospectingListsWithoutProspects.Select(l => l.Id).ToList());
+            var prospectingListsWithRegionPrefix =
+                prospectingListsWithoutProspects.Where(x => x.Title.Length >= 7 && x.Title.Substring(0, 7) == "region_");
+            var prospectingLists = GetProspectingListsOfProspects(prospectingListsWithRegionPrefix.Select(l => l.Id).ToList());
             return prospectingLists.SelectMany(pl => pl.AsCrmProspects());
         }
         private static IEnumerable<ProspectingList> GetProspectingLists()

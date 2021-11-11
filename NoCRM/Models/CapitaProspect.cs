@@ -31,6 +31,7 @@ namespace NoCRM.Models
         public bool IsExported { get; set; }
         public string NoCRMSheetId { get; set; }
         public string NoCRMRecordId { get; set; }
+        public string PrefixedDistrict => "region_" + District;
 
         public string[] AsNoCrmPostRecord()
         {
